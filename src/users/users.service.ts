@@ -21,7 +21,7 @@ export class UsersService {
       userID:user.userID,
       email:user.email,
       password:user.password,
-      roleID:user.role.roleID,
+      roleID: user.role.roleID,
     };
   }
 
@@ -40,7 +40,10 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<ReturnUserDto> {
-    const user = await this.userRepository.findOne({where:{userID: id}});
+    const user = await this.userRepository.findOne({
+      where: { userID: id },
+      relations: ['role'],
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -48,7 +51,10 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) : Promise<ReturnUserDto> {
-    const user = await this.userRepository.findOne({ where: { userID: id } });
+    const user = await this.userRepository.findOne({
+      where: { userID: id },
+      relations: ['role'],
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
