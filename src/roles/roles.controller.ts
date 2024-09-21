@@ -9,7 +9,7 @@ export class RolesController {
   constructor(private readonly rolesService: RolesService) { }
 
   @Post()
-  @HttpCode(HttpStatus.CREATED) // Returns 201 Created on success
+  @HttpCode(HttpStatus.CREATED)
   async create(@Body() createRoleDto: CreateRoleDto) {
     const role = await this.rolesService.create(createRoleDto);
     return {
@@ -20,7 +20,7 @@ export class RolesController {
   }
 
   @Get()
-  @HttpCode(HttpStatus.OK) // Returns 200 OK on success
+  @HttpCode(HttpStatus.OK)
   async findAll() {
     const roles = await this.rolesService.findAll();
     return {
@@ -31,7 +31,7 @@ export class RolesController {
   }
 
   @Get(':id')
-  @HttpCode(HttpStatus.OK) // Returns 200 OK on success
+  @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: string) {
     const role = await this.rolesService.findOne(+id);
     return {
@@ -42,7 +42,7 @@ export class RolesController {
   }
 
   @Patch(':id')
-  @HttpCode(HttpStatus.OK) // Returns 200 OK on success
+  @HttpCode(HttpStatus.OK)
   async update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     const updatedRole = await this.rolesService.update(+id, updateRoleDto);
     return {
@@ -53,7 +53,7 @@ export class RolesController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT) // Returns 204 No Content on success
+  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string, @Res() res: Response) {
     try {
       await this.rolesService.remove(+id);
