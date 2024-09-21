@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { RolesService } from '../roles/roles.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ReturnUserDto } from './dto/return-user.dto';
@@ -12,6 +13,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly rolesService: RolesService,
   ) { }
 
   private toReturnUserDto(user: User): ReturnUserDto {
@@ -24,13 +26,16 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<ReturnUserDto> {
-    const newUser = this.userRepository.create(createUserDto);
+    const { roleID, ...userData } = createUserDto;
+    const role = await this.rolesService.findOne(roleID);
+
+    const newUser = this.userRepository.create({ ...userData, role });
     const savedUser = await this.userRepository.save(newUser);
     return this.toReturnUserDto(savedUser);
   }
 
   async findAll(): Promise<ReturnUserDto[]> {
-    const users = await this.userRepository.find();
+    const users = await this.userRepository.find({ relations: ['role'] });
     return users.map(this.toReturnUserDto);
   }
 
