@@ -1,13 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { RolesGuard } from '../config/roles.guard';
+import { Roles } from '../config/roles.decorator';
 
+@UseGuards(RolesGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
+  @Roles(1)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateUserDto) {
@@ -19,6 +23,7 @@ export class UsersController {
     };
   }
 
+  @Roles(1, 2)
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll() {
@@ -30,6 +35,7 @@ export class UsersController {
     };
   }
 
+  @Roles(1, 2)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: string) {
@@ -41,6 +47,7 @@ export class UsersController {
     };
   }
 
+  @Roles(1)
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -52,6 +59,7 @@ export class UsersController {
     };
   }
 
+  @Roles(1)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string, @Res() res: Response) {
