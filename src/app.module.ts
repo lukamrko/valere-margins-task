@@ -2,18 +2,18 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DataSource } from 'typeorm';
+import { databaseConfig } from './config/database.config';
 
 
 @Module({
   imports: [
-     TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'sport-complex-db',
-      entities: [],
-      synchronize: true,
-    }),
+    TypeOrmModule.forRoot(databaseConfig()),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+
+export class AppModule {
+  constructor(private dataSource: DataSource) { }
+}
