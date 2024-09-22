@@ -1,4 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
+import { ReturnClassDto } from 'src/classes/dto/return-class.dto';
+import { ReturnWeekDto } from 'src/weeks/dto/return-week.dto';
 
 export class ReturnScheduleDto {
     @IsNotEmpty()
@@ -14,8 +16,8 @@ export class ReturnScheduleDto {
     timeEnd: Date;
 
     @IsNotEmpty()
-    classID: number;
+    class: ReturnClassDto;
 
     @IsNotEmpty()
-    weekID: number;
+    week: ReturnWeekDto;
 }

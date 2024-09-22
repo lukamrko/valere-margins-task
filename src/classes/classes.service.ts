@@ -6,7 +6,6 @@ import { UpdateClassDto } from './dto/update-class.dto';
 import { ReturnClassDto } from './dto/return-class.dto';
 import { Class } from './entities/class.entity';
 import { SportsService } from 'src/sports/sports.service';
-import { Sport } from 'src/sports/entities/sport.entity';
 
 @Injectable()
 export class ClassesService {

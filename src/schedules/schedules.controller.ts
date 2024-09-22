@@ -1,34 +1,66 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { ReturnScheduleDto } from './dto/return-schedule.dto';
+import { JwtAuthGuard } from '../config/jwt-auth.guard';
+import { RolesGuard } from '../config/roles.guard';
+import { Roles } from '../config/roles.decorator';
+import { Role } from '../config/role.enums';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.Admin)
 @Controller('schedules')
 export class SchedulesController {
-  constructor(private readonly schedulesService: SchedulesService) {}
+  constructor(private readonly schedulesService: SchedulesService) { }
 
   @Post()
-  create(@Body() createScheduleDto: CreateScheduleDto) {
-    return this.schedulesService.create(createScheduleDto);
+  async create(@Body() createScheduleDto: CreateScheduleDto): Promise<{ statusCode: number; message: string; data: ReturnScheduleDto }> {
+    const newSchedule = await this.schedulesService.create(createScheduleDto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Schedule successfully created',
+      data: newSchedule,
+    };
   }
 
   @Get()
-  findAll() {
-    return this.schedulesService.findAll();
+  async findAll(): Promise<{ statusCode: number; message: string; data: ReturnScheduleDto[] }> {
+    const schedules = await this.schedulesService.findAll();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Schedules retrieved successfully',
+      data: schedules,
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.schedulesService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<{ statusCode: number; message: string; data: ReturnScheduleDto }> {
+    const foundSchedule = await this.schedulesService.findOne(+id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: `Schedule with ID ${id} retrieved successfully`,
+      data: foundSchedule,
+    };
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateScheduleDto: UpdateScheduleDto) {
-    return this.schedulesService.update(+id, updateScheduleDto);
+  async update(@Param('id') id: string, @Body() updateScheduleDto: UpdateScheduleDto): Promise<{ statusCode: number; message: string; data: ReturnScheduleDto }> {
+    const updatedSchedule = await this.schedulesService.update(+id, updateScheduleDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: `Schedule with ID ${id} updated successfully`,
+      data: updatedSchedule,
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.schedulesService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: string): Promise<{ statusCode: number; message: string }> {
+    await this.schedulesService.remove(+id);
+    return {
+      statusCode: HttpStatus.NO_CONTENT,
+      message: `Schedule with ID ${id} deleted successfully`,
+    };
   }
 }

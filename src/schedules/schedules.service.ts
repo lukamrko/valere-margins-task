@@ -1,26 +1,105 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { ReturnScheduleDto } from './dto/return-schedule.dto';
+import { Schedule } from './entities/schedule.entity';
+import { ClassesService } from 'src/classes/classes.service';
+import { WeeksService } from 'src/weeks/weeks.service';
 
 @Injectable()
 export class SchedulesService {
-  create(createScheduleDto: CreateScheduleDto) {
-    return 'This action adds a new schedule';
+
+  constructor(
+    @InjectRepository(Schedule)
+    private readonly scheduleRepository: Repository<Schedule>,
+    private readonly classesService: ClassesService,
+    private readonly weeksService: WeeksService
+  ) { }
+
+  private async toReturnScheduleDto(schedule: Schedule): Promise<ReturnScheduleDto> {
+    const returnClassDto = await this.classesService.findOne(schedule.class.classID);
+    const returnWeekDto = await this.weeksService.findOne(schedule.week.weekID);
+
+    return {
+      scheduleID: schedule.scheduleID,
+      day: schedule.day,
+      timeStart: schedule.timeStart,
+      timeEnd: schedule.timeEnd,
+      class: returnClassDto,
+      week: returnWeekDto,
+    };
   }
 
-  findAll() {
-    return `This action returns all schedules`;
+  async create(createScheduleDto: CreateScheduleDto): Promise<ReturnScheduleDto> {
+    const cls = await this.classesService.findOne(createScheduleDto.classID);
+    const week = await this.weeksService.findOne(createScheduleDto.weekID);
+
+    if (!cls) {
+      throw new NotFoundException(`Class with ID ${createScheduleDto.classID} not found`);
+    }
+    if (!week) {
+      throw new NotFoundException(`Week with ID ${createScheduleDto.weekID} not found`);
+    }
+
+    const newSchedule = this.scheduleRepository.create({
+      ...createScheduleDto,
+      class: cls,
+      week: week,
+    });
+
+    const savedSchedule = await this.scheduleRepository.save(newSchedule);
+    return this.toReturnScheduleDto(savedSchedule);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} schedule`;
+  async findAll(): Promise<ReturnScheduleDto[]> {
+    const schedules = await this.scheduleRepository.find({ relations: ['class', 'week'] });
+    return Promise.all(schedules.map(schedule => this.toReturnScheduleDto(schedule)));
   }
 
-  update(id: number, updateScheduleDto: UpdateScheduleDto) {
-    return `This action updates a #${id} schedule`;
+  async findOne(id: number): Promise<ReturnScheduleDto> {
+    const schedule = await this.scheduleRepository.findOne({
+      where: { scheduleID: id },
+      relations: ['class', 'week'],
+    });
+    if (!schedule) {
+      throw new NotFoundException(`Schedule with ID ${id} not found`);
+    }
+    return this.toReturnScheduleDto(schedule);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} schedule`;
+  async update(id: number, updateScheduleDto: UpdateScheduleDto): Promise<ReturnScheduleDto> {
+    const schedule = await this.scheduleRepository.findOne({ where: { scheduleID: id } });
+    if (!schedule) {
+      throw new NotFoundException(`Schedule with ID ${id} not found`);
+    }
+
+    if (updateScheduleDto.classID) {
+      const cls = await this.classesService.findOne(updateScheduleDto.classID);
+      if (!cls) {
+        throw new NotFoundException(`Class with ID ${updateScheduleDto.classID} not found`);
+      }
+      schedule.class = cls;
+    }
+
+    if (updateScheduleDto.weekID) {
+      const week = await this.weeksService.findOne(updateScheduleDto.weekID);
+      if (!week) {
+        throw new NotFoundException(`Week with ID ${updateScheduleDto.weekID} not found`);
+      }
+      schedule.week = week;
+    }
+
+    Object.assign(schedule, updateScheduleDto);
+    const updatedSchedule = await this.scheduleRepository.save(schedule);
+    return this.toReturnScheduleDto(updatedSchedule);
+  }
+
+  async remove(id: number): Promise<void> {
+    const result = await this.scheduleRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Schedule with ID ${id} not found`);
+    }
   }
 }
