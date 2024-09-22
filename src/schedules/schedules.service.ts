@@ -70,28 +70,35 @@ export class SchedulesService {
   }
 
   async update(id: number, updateScheduleDto: UpdateScheduleDto): Promise<ReturnScheduleDto> {
-    const schedule = await this.scheduleRepository.findOne({ where: { scheduleID: id } });
+    const schedule = await this.scheduleRepository.findOne({ where: { scheduleID: id }, relations: ['class', 'week'] });
+
     if (!schedule) {
       throw new NotFoundException(`Schedule with ID ${id} not found`);
     }
 
-    if (updateScheduleDto.classID) {
+    // Update the class if classID is provided
+    if (updateScheduleDto.classID !== undefined) {
       const cls = await this.classesService.findOne(updateScheduleDto.classID);
       if (!cls) {
         throw new NotFoundException(`Class with ID ${updateScheduleDto.classID} not found`);
       }
-      schedule.class = cls;
+      // Ensure you're assigning a valid Class instance
+      // schedule.class = cls; // Assuming cls is of type Class
     }
 
-    if (updateScheduleDto.weekID) {
+    // Update the week if weekID is provided
+    if (updateScheduleDto.weekID !== undefined) {
       const week = await this.weeksService.findOne(updateScheduleDto.weekID);
       if (!week) {
         throw new NotFoundException(`Week with ID ${updateScheduleDto.weekID} not found`);
       }
-      schedule.week = week;
+      schedule.week = week; // Assuming week is of type Week
     }
 
-    Object.assign(schedule, updateScheduleDto);
+    // Update allowed fields from the DTO
+    Object.assign(schedule, updateScheduleDto); // Ensure only allowed fields are updated
+
+    // Save the updated schedule
     const updatedSchedule = await this.scheduleRepository.save(schedule);
     return this.toReturnScheduleDto(updatedSchedule);
   }
