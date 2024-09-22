@@ -11,6 +11,7 @@ import { SportsModule } from './sports/sports.module';
 import { WeeksModule } from './weeks/weeks.module';
 import { ClassesModule } from './classes/classes.module';
 import { SchedulesModule } from './schedules/schedules.module';
+import { AttendancesModule } from './attendances/attendances.module';
 
 
 @Module({
@@ -23,6 +24,7 @@ import { SchedulesModule } from './schedules/schedules.module';
     WeeksModule,
     ClassesModule,
     SchedulesModule,
+    AttendancesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
