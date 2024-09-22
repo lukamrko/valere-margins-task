@@ -7,6 +7,8 @@ import { ReturnScheduleDto } from './dto/return-schedule.dto';
 import { Schedule } from './entities/schedule.entity';
 import { ClassesService } from 'src/classes/classes.service';
 import { WeeksService } from 'src/weeks/weeks.service';
+import { Class } from 'src/classes/entities/class.entity';
+import { Week } from 'src/weeks/entities/week.entity';
 
 @Injectable()
 export class SchedulesService {
@@ -82,8 +84,8 @@ export class SchedulesService {
       if (!cls) {
         throw new NotFoundException(`Class with ID ${updateScheduleDto.classID} not found`);
       }
-      // Ensure you're assigning a valid Class instance
-      // schedule.class = cls; // Assuming cls is of type Class
+      // Assign only the classID instead of the entire class object
+      schedule.class = { classID: cls.classID } as Class; // This will only set the classID, not the other properties
     }
 
     // Update the week if weekID is provided
@@ -92,10 +94,11 @@ export class SchedulesService {
       if (!week) {
         throw new NotFoundException(`Week with ID ${updateScheduleDto.weekID} not found`);
       }
-      schedule.week = week; // Assuming week is of type Week
+      // Assign only the weekID instead of the entire week object
+      schedule.week = { weekID: week.weekID } as Week; // This will only set the weekID, not the other properties
     }
 
-    // Update allowed fields from the DTO
+    // Update allowed fields from the DTO (excluding class and week)
     Object.assign(schedule, updateScheduleDto); // Ensure only allowed fields are updated
 
     // Save the updated schedule

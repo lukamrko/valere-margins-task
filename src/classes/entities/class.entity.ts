@@ -17,6 +17,6 @@ export class Class {
     @JoinColumn({ name: 'sportID' }) 
     sport: Sport;
 
-    @OneToMany(() => Attendance, attendance => attendance.class)
+    @OneToMany(() => Attendance, attendance => attendance.class, { nullable: true })
     attendances: Attendance[];
 }
