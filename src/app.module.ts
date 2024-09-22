@@ -8,6 +8,7 @@ import { databaseConfig } from './config/database.config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './config/auth.module';
 import { SportsModule } from './sports/sports.module';
+import { WeeksModule } from './weeks/weeks.module';
 
 
 @Module({
@@ -17,6 +18,7 @@ import { SportsModule } from './sports/sports.module';
     UsersModule,
     AuthModule,
     SportsModule,
+    WeeksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
