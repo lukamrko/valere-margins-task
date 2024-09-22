@@ -7,7 +7,6 @@ import { Roles } from '../config/roles.decorator';
 import { JwtAuthGuard } from '../config/jwt-auth.guard';
 import { Role } from '../config/role.enums';
 
-
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.Admin)
 @Controller('users')
