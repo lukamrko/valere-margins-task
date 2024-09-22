@@ -10,6 +10,7 @@ import { AuthModule } from './config/auth.module';
 import { SportsModule } from './sports/sports.module';
 import { WeeksModule } from './weeks/weeks.module';
 import { ClassesModule } from './classes/classes.module';
+import { SchedulesModule } from './schedules/schedules.module';
 
 
 @Module({
@@ -21,6 +22,7 @@ import { ClassesModule } from './classes/classes.module';
     SportsModule,
     WeeksModule,
     ClassesModule,
+    SchedulesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
