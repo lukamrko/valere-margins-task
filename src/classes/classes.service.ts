@@ -28,16 +28,14 @@ export class ClassesService {
   }
 
   async create(createClassDto: CreateClassDto): Promise<ReturnClassDto> {
-    // Fetch the sport by its ID to ensure it exists
     const sport = await this.sportsService.findOne(createClassDto.sportID);
     if (!sport) {
       throw new NotFoundException(`Sport with ID ${createClassDto.sportID} not found`);
     }
 
-    // Create and save the new class with the sport relationship
     const newClass = this.classRepository.create({
       ...createClassDto,
-      sport: sport, // Set the sport relationship
+      sport: sport, 
     });
 
     const savedClass = await this.classRepository.save(newClass);
