@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './config/auth.module';
 import { SportsModule } from './sports/sports.module';
 import { WeeksModule } from './weeks/weeks.module';
+import { ClassesModule } from './classes/classes.module';
 
 
 @Module({
@@ -19,6 +20,7 @@ import { WeeksModule } from './weeks/weeks.module';
     AuthModule,
     SportsModule,
     WeeksModule,
+    ClassesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
