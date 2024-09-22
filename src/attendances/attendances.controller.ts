@@ -1,34 +1,55 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { AttendancesService } from './attendances.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
-import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { ReturnAttendanceDto } from './dto/return-attendance.dto';
+import { JwtAuthGuard } from '../config/jwt-auth.guard';
+import { RolesGuard } from '../config/roles.guard';
+import { Roles } from '../config/roles.decorator';
+import { Role } from '../config/role.enums';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.Admin) // Adjust roles as necessary
 @Controller('attendances')
 export class AttendancesController {
-  constructor(private readonly attendancesService: AttendancesService) {}
+  constructor(private readonly attendancesService: AttendancesService) { }
 
   @Post()
-  create(@Body() createAttendanceDto: CreateAttendanceDto) {
-    return this.attendancesService.create(createAttendanceDto);
+  async create(@Body() createAttendanceDto: CreateAttendanceDto): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto }> {
+    const newAttendance = await this.attendancesService.create(createAttendanceDto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Attendance successfully created',
+      data: newAttendance,
+    };
   }
 
   @Get()
-  findAll() {
-    return this.attendancesService.findAll();
+  async findAll(): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto[] }> {
+    const attendances = await this.attendancesService.findAll();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Attendances retrieved successfully',
+      data: attendances,
+    };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.attendancesService.findOne(+id);
+  @Get(':userID/:classID')
+  async findOne(@Param('userID') userID: string, @Param('classID') classID: string): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto }> {
+    const foundAttendance = await this.attendancesService.findOne(+userID, +classID);
+    return {
+      statusCode: HttpStatus.OK,
+      message: `Attendance for User ID ${userID} and Class ID ${classID} retrieved successfully`,
+      data: foundAttendance,
+    };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAttendanceDto: UpdateAttendanceDto) {
-    return this.attendancesService.update(+id, updateAttendanceDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.attendancesService.remove(+id);
+  @Delete(':userID/:classID')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('userID') userID: string, @Param('classID') classID: string): Promise<{ statusCode: number; message: string }> {
+    await this.attendancesService.remove(+userID, +classID);
+    return {
+      statusCode: HttpStatus.NO_CONTENT,
+      message: `Attendance for User ID ${userID} and Class ID ${classID} deleted successfully`,
+    };
   }
 }

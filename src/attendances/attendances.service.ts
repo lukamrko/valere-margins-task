@@ -1,26 +1,74 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
-import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { ReturnAttendanceDto } from './dto/return-attendance.dto';
+import { Attendance } from './entities/attendance.entity';
+import { ClassesService } from 'src/classes/classes.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AttendancesService {
-  create(createAttendanceDto: CreateAttendanceDto) {
-    return 'This action adds a new attendance';
+  constructor(
+    @InjectRepository(Attendance)
+    private readonly attendanceRepository: Repository<Attendance>,
+    private readonly classesService: ClassesService,
+    private readonly usersService: UsersService
+  ) { }
+
+  private async toReturnAttendanceDto(attendance: Attendance): Promise<ReturnAttendanceDto> {
+    const returnClassDto = await this.classesService.findOne(attendance.class.classID);
+    const returnUserDto = await this.usersService.findOne(attendance.user.userID); // Adjust to your user retrieval method
+
+    return {
+      user: returnUserDto,
+      class: returnClassDto,
+      registrationDateTime: attendance.registrationDateTime,
+    };
   }
 
-  findAll() {
-    return `This action returns all attendances`;
+  async create(createAttendanceDto: CreateAttendanceDto): Promise<ReturnAttendanceDto> {
+    const cls = await this.classesService.findOne(createAttendanceDto.classID);
+    const user = await this.usersService.findOne(createAttendanceDto.userID);
+
+    if (!cls) {
+      throw new NotFoundException(`Class with ID ${createAttendanceDto.classID} not found`);
+    }
+    if (!user) {
+      throw new NotFoundException(`User with ID ${createAttendanceDto.userID} not found`);
+    }
+
+    const newAttendance = this.attendanceRepository.create({
+      ...createAttendanceDto,
+      registrationDateTime: new Date(), // Set current date and time
+      class: cls,
+      user: user,
+    });
+
+    const savedAttendance = await this.attendanceRepository.save(newAttendance);
+    return this.toReturnAttendanceDto(savedAttendance);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} attendance`;
+  async findAll(): Promise<ReturnAttendanceDto[]> {
+    const attendances = await this.attendanceRepository.find({ relations: ['class', 'user'] });
+    return Promise.all(attendances.map(attendance => this.toReturnAttendanceDto(attendance)));
   }
 
-  update(id: number, updateAttendanceDto: UpdateAttendanceDto) {
-    return `This action updates a #${id} attendance`;
+  async findOne(userID: number, classID: number): Promise<ReturnAttendanceDto> {
+    const attendance = await this.attendanceRepository.findOne({
+      where: { userID, classID },
+      relations: ['class', 'user'],
+    });
+    if (!attendance) {
+      throw new NotFoundException(`Attendance not found for User ID ${userID} and Class ID ${classID}`);
+    }
+    return this.toReturnAttendanceDto(attendance);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} attendance`;
+  async remove(userID: number, classID: number): Promise<void> {
+    const result = await this.attendanceRepository.delete({ userID, classID });
+    if (result.affected === 0) {
+      throw new NotFoundException(`Attendance not found for User ID ${userID} and Class ID ${classID}`);
+    }
   }
 }
