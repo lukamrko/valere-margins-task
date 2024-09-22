@@ -1,9 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateSportDto } from './dto/create-sport.dto';
 import { UpdateSportDto } from './dto/update-sport.dto';
+import { Sport } from './entities/sport.entity';
 
 @Injectable()
 export class SportsService {
+
+  constructor(
+    @InjectRepository(Sport)
+    private readonly userRepository: Repository<Sport>
+  ) { }
+
   create(createSportDto: CreateSportDto) {
     return 'This action adds a new sport';
   }
