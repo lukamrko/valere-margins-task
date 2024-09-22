@@ -7,6 +7,7 @@ import { DataSource } from 'typeorm';
 import { databaseConfig } from './config/database.config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './config/auth.module';
+import { SportsModule } from './sports/sports.module';
 
 
 @Module({
@@ -15,6 +16,7 @@ import { AuthModule } from './config/auth.module';
     TypeOrmModule.forRoot(databaseConfig()),
     UsersModule,
     AuthModule,
+    SportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
