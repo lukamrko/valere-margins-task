@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateClassDto } from './dto/create-class.dto';
@@ -6,6 +6,7 @@ import { UpdateClassDto } from './dto/update-class.dto';
 import { ReturnClassDto } from './dto/return-class.dto';
 import { Class } from './entities/class.entity';
 import { SportsService } from 'src/sports/sports.service';
+import { Sport } from 'src/sports/entities/sport.entity';
 
 @Injectable()
 export class ClassesService {
@@ -17,7 +18,7 @@ export class ClassesService {
   ) { }
 
   private async toReturnClassDto(cls: Class): Promise<ReturnClassDto> {
-    const returnSportDto = await this.sportsService.findOne(cls.sport.sportID); 
+    const returnSportDto = await this.sportsService.findOne(cls.sport.sportID);
     return {
       classID: cls.classID,
       className: cls.className,
@@ -27,7 +28,18 @@ export class ClassesService {
   }
 
   async create(createClassDto: CreateClassDto): Promise<ReturnClassDto> {
-    const newClass = this.classRepository.create(createClassDto);
+    // Fetch the sport by its ID to ensure it exists
+    const sport = await this.sportsService.findOne(createClassDto.sportID);
+    if (!sport) {
+      throw new NotFoundException(`Sport with ID ${createClassDto.sportID} not found`);
+    }
+
+    // Create and save the new class with the sport relationship
+    const newClass = this.classRepository.create({
+      ...createClassDto,
+      sport: sport, // Set the sport relationship
+    });
+
     const savedClass = await this.classRepository.save(newClass);
     return this.toReturnClassDto(savedClass);
   }
@@ -55,6 +67,15 @@ export class ClassesService {
     if (!cls) {
       throw new NotFoundException(`Class with ID ${id} not found`);
     }
+
+    if (updateClassDto.sportID) {
+      const sport = await this.sportsService.findOne(updateClassDto.sportID);
+      if (!sport) {
+        throw new NotFoundException(`Sport with ID ${updateClassDto.sportID} not found`);
+      }
+      cls.sport = sport;
+    }
+
     Object.assign(cls, updateClassDto);
     const updatedClass = await this.classRepository.save(cls);
     return this.toReturnClassDto(updatedClass);
