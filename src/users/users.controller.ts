@@ -13,10 +13,8 @@ import { JwtAuthGuard } from '../config/jwt-auth.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
-  // @Roles(1)
+  @Roles(1)
   @Post()
-  // @HttpCode(HttpStatus.CREATED)
-  // @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
     return {
@@ -26,10 +24,8 @@ export class UsersController {
     };
   }
 
-  @Roles(1, 2)
+  @Roles(1)
   @Get()
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll() {
     const users = await this.usersService.findAll();
     return {
@@ -39,10 +35,8 @@ export class UsersController {
     };
   }
 
-  @Roles(1, 2)
+  @Roles(1)
   @Get(':id')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   async findOne(@Param('id') id: string) {
     const user = await this.usersService.findOne(+id);
     return {
@@ -54,8 +48,6 @@ export class UsersController {
 
   @Roles(1)
   @Patch(':id')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const updatedUser = await this.usersService.update(+id, updateUserDto);
     return {
@@ -67,19 +59,11 @@ export class UsersController {
 
   @Roles(1)
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  async remove(@Param('id') id: string, @Res() res: Response) {
-    try {
-      await this.usersService.remove(+id);
-      res.status(HttpStatus.NO_CONTENT).json({
-        statusCode: HttpStatus.NO_CONTENT,
-      });
-    } catch (error) {
-      res.status(HttpStatus.NOT_FOUND).json({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: error.message,
-      });
-    }
+  async remove(@Param('id') id: string) {
+    await this.usersService.remove(+id);
+    return {
+      statusCode: HttpStatus.NO_CONTENT,
+      message: `User with ID ${id} deleted successfully`,
+    };
   }
 }
