@@ -78,30 +78,24 @@ export class SchedulesService {
       throw new NotFoundException(`Schedule with ID ${id} not found`);
     }
 
-    // Update the class if classID is provided
     if (updateScheduleDto.classID !== undefined) {
       const cls = await this.classesService.findOne(updateScheduleDto.classID);
       if (!cls) {
         throw new NotFoundException(`Class with ID ${updateScheduleDto.classID} not found`);
       }
-      // Assign only the classID instead of the entire class object
-      schedule.class = { classID: cls.classID } as Class; // This will only set the classID, not the other properties
+      schedule.class = { classID: cls.classID } as Class;
     }
 
-    // Update the week if weekID is provided
     if (updateScheduleDto.weekID !== undefined) {
       const week = await this.weeksService.findOne(updateScheduleDto.weekID);
       if (!week) {
         throw new NotFoundException(`Week with ID ${updateScheduleDto.weekID} not found`);
       }
-      // Assign only the weekID instead of the entire week object
-      schedule.week = { weekID: week.weekID } as Week; // This will only set the weekID, not the other properties
+      schedule.week = { weekID: week.weekID } as Week;
     }
 
-    // Update allowed fields from the DTO (excluding class and week)
-    Object.assign(schedule, updateScheduleDto); // Ensure only allowed fields are updated
+    Object.assign(schedule, updateScheduleDto);
 
-    // Save the updated schedule
     const updatedSchedule = await this.scheduleRepository.save(schedule);
     return this.toReturnScheduleDto(updatedSchedule);
   }
