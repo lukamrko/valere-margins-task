@@ -1,6 +1,5 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from '../config/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -19,10 +18,14 @@ export class AuthController {
         return this.authService.login(user);
     }
 
-    // A test route to verify token validity
-    @UseGuards(JwtAuthGuard)
-    @Post('test')
-    async test(@Req() req) {
-        return req.user;
+    @Post('register')
+    @HttpCode(HttpStatus.OK)
+    async register(@Body() registerDto: { email: string; password: string }) {
+        const user = await this.authService.registerUser(registerDto.email, registerDto.password);
+        return {
+            statusCode: HttpStatus.CREATED,
+            message: 'User successfully registered',
+            data: user,
+        };
     }
 }
