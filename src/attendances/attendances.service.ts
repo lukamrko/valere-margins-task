@@ -6,6 +6,9 @@ import { ReturnAttendanceDto } from './dto/return-attendance.dto';
 import { Attendance } from './entities/attendance.entity';
 import { ClassesService } from 'src/classes/classes.service';
 import { UsersService } from 'src/users/users.service';
+import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { Class } from 'src/classes/entities/class.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AttendancesService {
@@ -63,6 +66,36 @@ export class AttendancesService {
       throw new NotFoundException(`Attendance not found for User ID ${userID} and Class ID ${classID}`);
     }
     return this.toReturnAttendanceDto(attendance);
+  }
+
+  async update(userID: number, classID: number, updateAttendanceDto: UpdateAttendanceDto): Promise<ReturnAttendanceDto> {
+    const attendance = await this.attendanceRepository
+      .findOne({ where: { userID: userID, classID: classID }, relations: ['user', 'class'] });
+
+    if (!attendance) {
+      throw new NotFoundException(`Schedule with combination of userID ${userID} and classID ${classID}`);
+    }
+
+    if (updateAttendanceDto.classID !== undefined) {
+      const cls = await this.classesService.findOne(updateAttendanceDto.classID);
+      if (!cls) {
+        throw new NotFoundException(`Class with ID ${updateAttendanceDto.classID} not found`);
+      }
+      attendance.class = { classID: cls.classID } as Class;
+    }
+
+    if (updateAttendanceDto.userID !== undefined) {
+      const user = await this.usersService.findOne(updateAttendanceDto.userID);
+      if (!user) {
+        throw new NotFoundException(`Week with ID ${updateAttendanceDto.userID} not found`);
+      }
+      attendance.user = { userID: user.userID } as User;
+    }
+
+    Object.assign(attendance, updateAttendanceDto);
+
+    const updatedSchedule = await this.attendanceRepository.save(attendance);
+    return this.toReturnAttendanceDto(updatedSchedule);
   }
 
   async remove(userID: number, classID: number): Promise<void> {

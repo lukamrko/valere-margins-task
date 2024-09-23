@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../config/jwt-auth.guard';
 import { RolesGuard } from '../config/roles.guard';
 import { Roles } from '../config/roles.decorator';
 import { Role } from '../config/role.enums';
+import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.Admin) // Adjust roles as necessary
@@ -40,6 +41,16 @@ export class AttendancesController {
       statusCode: HttpStatus.OK,
       message: `Attendance for User ID ${userID} and Class ID ${classID} retrieved successfully`,
       data: foundAttendance,
+    };
+  }
+
+  @Patch(':userID/:classID')
+  async update(@Param('userID') userID: string, @Param('classID') classID: string, @Body() updateAttendanceDto: UpdateAttendanceDto): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto }> {
+    const updatedSchedule = await this.attendancesService.update(+userID, +classID, updateAttendanceDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: `Schedule with  User ID ${userID} and Class ID ${classID} updated successfully`,
+      data: updatedSchedule,
     };
   }
 
