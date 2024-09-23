@@ -10,7 +10,7 @@ import { Role } from '../config/role.enums';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.Admin)
-@Controller('classes')
+@Controller('api/classes')
 export class ClassesController {
   constructor(private readonly classesService: ClassesService) { }
 
@@ -24,7 +24,7 @@ export class ClassesController {
     };
   }
 
-  @Get()
+  @Get('all')
   async findAll(): Promise<{ statusCode: number; message: string; data: ReturnClassDto[] }> {
     const classes = await this.classesService.findAll();
     return {

@@ -49,14 +49,17 @@ export class ClassesService {
   }
 
   async findAllByNames(names: string[]): Promise<ReturnClassDto[]> {
+    const lowercaseNames = names.map(name => name.toLowerCase()); 
+
     const classes = await this.classRepository
       .createQueryBuilder('class')
       .leftJoinAndSelect('class.sport', 'sport')
-      .where('sport.name IN (:...names)', { names })  // Filter by sport names
+      .where('LOWER(sport.name) IN (:...names)', { names: lowercaseNames })
       .getMany();
 
     return Promise.all(classes.map(cls => this.toReturnClassDto(cls)));
   }
+
 
   async findOne(id: number): Promise<ReturnClassDto> {
     const cls = await this.classRepository.findOne({
