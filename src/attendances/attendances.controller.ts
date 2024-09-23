@@ -34,13 +34,25 @@ export class AttendancesController {
     };
   }
 
-  @Get(':userID/:classID')
-  async findOne(@Param('userID') userID: string, @Param('classID') classID: string): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto }> {
-    const foundAttendance = await this.attendancesService.findOne(+userID, +classID);
+  // Fetch all attendances for a specific user
+  @Get('user/:userID')
+  async findAllForUser(@Param('userID') userID: string): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto[] }> {
+    const foundAttendances = await this.attendancesService.findAllForUser(+userID);
     return {
       statusCode: HttpStatus.OK,
-      message: `Attendance for User ID ${userID} and Class ID ${classID} retrieved successfully`,
-      data: foundAttendance,
+      message: `Attendances for User ID ${userID} retrieved successfully`,
+      data: foundAttendances,
+    };
+  }
+
+  // Fetch all attendances for a specific class
+  @Get('class/:classID')
+  async findAllForClass(@Param('classID') classID: string): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto[] }> {
+    const foundAttendances = await this.attendancesService.findAllForClass(+classID);
+    return {
+      statusCode: HttpStatus.OK,
+      message: `Attendances for Class ID ${classID} retrieved successfully`,
+      data: foundAttendances,
     };
   }
 

@@ -16,12 +16,13 @@ export class AttendancesService {
     @InjectRepository(Attendance)
     private readonly attendanceRepository: Repository<Attendance>,
     private readonly classesService: ClassesService,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
   ) { }
 
+  // Convert Attendance entity to ReturnAttendanceDto, ensuring type safety
   private async toReturnAttendanceDto(attendance: Attendance): Promise<ReturnAttendanceDto> {
     const returnClassDto = await this.classesService.findOne(attendance.class.classID);
-    const returnUserDto = await this.usersService.findOne(attendance.user.userID); // Adjust to your user retrieval method
+    const returnUserDto = await this.usersService.findOne(attendance.user.userID);
 
     return {
       user: returnUserDto,
@@ -30,6 +31,7 @@ export class AttendancesService {
     };
   }
 
+  // Create a new attendance
   async create(createAttendanceDto: CreateAttendanceDto): Promise<ReturnAttendanceDto> {
     const cls = await this.classesService.findOne(createAttendanceDto.classID);
     const user = await this.usersService.findOne(createAttendanceDto.userID);
@@ -42,7 +44,7 @@ export class AttendancesService {
     }
 
     const newAttendance = this.attendanceRepository.create({
-      registrationDateTime: createAttendanceDto.registrationDateTime??new Date(), // Set current date and time
+      registrationDateTime: createAttendanceDto.registrationDateTime ?? new Date(), // Use current date if not provided
       class: cls,
       user: user,
     });
@@ -51,14 +53,40 @@ export class AttendancesService {
     return this.toReturnAttendanceDto(savedAttendance);
   }
 
+  // Fetch all attendances
   async findAll(): Promise<ReturnAttendanceDto[]> {
     const attendances = await this.attendanceRepository.find({ relations: ['class', 'user'] });
     return Promise.all(attendances.map(attendance => this.toReturnAttendanceDto(attendance)));
   }
 
+  // Fetch all attendances for a specific user
+  async findAllForUser(userID: number): Promise<ReturnAttendanceDto[]> {
+    const attendances = await this.attendanceRepository.find({
+      where: { user: { userID } },
+      relations: ['class', 'user'],
+    });
+    if (!attendances.length) {
+      throw new NotFoundException(`No attendances found for User ID ${userID}`);
+    }
+    return Promise.all(attendances.map(attendance => this.toReturnAttendanceDto(attendance)));
+  }
+
+  // Fetch all attendances for a specific class
+  async findAllForClass(classID: number): Promise<ReturnAttendanceDto[]> {
+    const attendances = await this.attendanceRepository.find({
+      where: { class: { classID } },
+      relations: ['class', 'user'],
+    });
+    if (!attendances.length) {
+      throw new NotFoundException(`No attendances found for Class ID ${classID}`);
+    }
+    return Promise.all(attendances.map(attendance => this.toReturnAttendanceDto(attendance)));
+  }
+
+  // Fetch a specific attendance by userID and classID
   async findOne(userID: number, classID: number): Promise<ReturnAttendanceDto> {
     const attendance = await this.attendanceRepository.findOne({
-      where: { userID, classID },
+      where: { user: { userID }, class: { classID } },
       relations: ['class', 'user'],
     });
     if (!attendance) {
@@ -97,8 +125,9 @@ export class AttendancesService {
     return this.toReturnAttendanceDto(updatedSchedule);
   }
 
+  // Remove an attendance
   async remove(userID: number, classID: number): Promise<void> {
-    const result = await this.attendanceRepository.delete({ userID, classID });
+    const result = await this.attendanceRepository.delete({ user: { userID }, class: { classID } });
     if (result.affected === 0) {
       throw new NotFoundException(`Attendance not found for User ID ${userID} and Class ID ${classID}`);
     }
