@@ -48,6 +48,16 @@ export class ClassesService {
     return Promise.all(classes.map(cls => this.toReturnClassDto(cls)));
   }
 
+  async findAllByNames(names: string[]): Promise<ReturnClassDto[]> {
+    const classes = await this.classRepository
+      .createQueryBuilder('class')
+      .leftJoinAndSelect('class.sport', 'sport')
+      .where('sport.name IN (:...names)', { names })  // Filter by sport names
+      .getMany();
+
+    return Promise.all(classes.map(cls => this.toReturnClassDto(cls)));
+  }
+
   async findOne(id: number): Promise<ReturnClassDto> {
     const cls = await this.classRepository.findOne({
       where: { classID: id },

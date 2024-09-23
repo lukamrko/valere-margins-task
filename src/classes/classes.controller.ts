@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, Query } from '@nestjs/common';
 import { ClassesService } from './classes.service';
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
@@ -30,6 +30,20 @@ export class ClassesController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Classes retrieved successfully',
+      data: classes,
+    };
+  }
+
+  @Roles(Role.Admin, Role.User)
+  @Get()
+  async findAllByNames(@Query('sports') sports: string)
+    : Promise<{ statusCode: number; message: string; data: ReturnClassDto[] }> {
+    const sportNames = sports.split(',');
+    const classes = await this.classesService.findAllByNames(sportNames);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: `Classes with sports: ${sportNames.join(', ')} retrieved successfully`,
       data: classes,
     };
   }
