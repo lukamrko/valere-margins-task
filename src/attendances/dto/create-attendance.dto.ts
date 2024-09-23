@@ -5,4 +5,6 @@ export class CreateAttendanceDto {
     userID: number;
     @IsNotEmpty()
     classID: number;
+
+    registrationDateTime: Date;
 }

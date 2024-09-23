@@ -42,8 +42,7 @@ export class AttendancesService {
     }
 
     const newAttendance = this.attendanceRepository.create({
-      ...createAttendanceDto,
-      registrationDateTime: new Date(), // Set current date and time
+      registrationDateTime: createAttendanceDto.registrationDateTime??new Date(), // Set current date and time
       class: cls,
       user: user,
     });
