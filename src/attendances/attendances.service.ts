@@ -37,6 +37,7 @@ export class AttendancesService {
     const newAttendance = this.attendanceRepository.create({
       class: { classID },
       user: { userID },
+      registrationDateTime: createAttendanceDto.registrationDateTime
     });
 
     const savedAttendance = await this.attendanceRepository.save(newAttendance);
