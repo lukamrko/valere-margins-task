@@ -43,7 +43,7 @@ export class ClassesController {
 
   @Roles(Role.Admin, Role.User)
   @Get()
-  @ApiOperation({ summary: 'Retrieve classes by sports names' })
+  @ApiOperation({ summary: 'USED BY NORMAL USERS. Retrieve classes by sports names' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Classes with specified sports retrieved successfully', type: [ReturnClassDto] })
   async findAllByNames(@Query('sports') sports: string): Promise<{ statusCode: number; message: string; data: ReturnClassDto[] }> {
     const sportNames = sports.split(',');
@@ -72,7 +72,7 @@ export class ClassesController {
 
   @Roles(Role.Admin, Role.User)
   @Get(':id')
-  @ApiOperation({ summary: 'Retrieve a class with schedules by ID' })
+  @ApiOperation({ summary: 'USED BY NORMAL USERS. Retrieve a class with schedules by ID' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Class with schedules retrieved successfully', type: FullReturnClassDTO })
   async findOneWithSchedules(@Param('id') id: string): Promise<{ statusCode: number; message: string; data: FullReturnClassDTO }> {
     const classWithSchedules = await this.classesService.findOneWithSchedules(+id);
