@@ -20,11 +20,11 @@ export class ReturnScheduleDto {
     @IsNotEmpty()
     timeEnd: Date;
 
-    @ApiProperty({ description: 'The ID of the class associated with the schedule' })
+    @ApiProperty({ description: 'The class associated with the schedule' })
     @IsNotEmpty()
-    classID: number;
+    class: ReturnClassDto;
 
-    @ApiProperty({ description: 'The ID of the week associated with the schedule' })
+    @ApiProperty({ description: 'The week associated with the schedule' })
     @IsNotEmpty()
-    weekID: number;
+    week: ReturnWeekDto;
 }
