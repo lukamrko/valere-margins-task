@@ -8,7 +8,9 @@ import { RolesGuard } from '../config/roles.guard';
 import { Roles } from '../config/roles.decorator';
 import { Role } from '../config/role.enums';
 import { FullReturnClassDTO } from './dto/full-return-class.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Classes')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.Admin)
 @Controller('api/classes')

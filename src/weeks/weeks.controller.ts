@@ -7,7 +7,9 @@ import { RolesGuard } from '../config/roles.guard';
 import { Roles } from '../config/roles.decorator';
 import { JwtAuthGuard } from '../config/jwt-auth.guard';
 import { Role } from '../config/role.enums';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Weeks')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.Admin)
 @Controller('api/weeks')
