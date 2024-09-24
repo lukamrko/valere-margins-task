@@ -7,7 +7,7 @@ import { RolesGuard } from '../roles/roles.guard';
 import { Roles } from '../roles/roles.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Role } from '../roles/role.enums';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Sports')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -17,6 +17,9 @@ export class SportsController {
   constructor(private readonly sportsService: SportsService) { }
 
   @Post()
+  @ApiOperation({ summary: 'Create a new sport' })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Sport successfully created', type: ReturnSportDto })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input data' })
   async create(@Body() createSportDto: CreateSportDto): Promise<{ statusCode: number; message: string; data: ReturnSportDto }> {
     const sport = await this.sportsService.create(createSportDto);
     return {
@@ -27,6 +30,8 @@ export class SportsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Retrieve all sports' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Sports retrieved successfully', type: [ReturnSportDto] })
   async findAll(): Promise<{ statusCode: number; message: string; data: ReturnSportDto[] }> {
     const sports = await this.sportsService.findAll();
     return {
@@ -37,6 +42,9 @@ export class SportsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Retrieve a specific sport by ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Sport retrieved successfully', type: ReturnSportDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Sport not found' })
   async findOne(@Param('id') id: string): Promise<{ statusCode: number; message: string; data: ReturnSportDto }> {
     const sport = await this.sportsService.findOne(+id);
     return {
@@ -47,6 +55,9 @@ export class SportsController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update a specific sport by ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Sport updated successfully', type: ReturnSportDto })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Sport not found' })
   async update(@Param('id') id: string, @Body() updateSportDto: UpdateSportDto): Promise<{ statusCode: number; message: string; data: ReturnSportDto }> {
     const updatedSport = await this.sportsService.update(+id, updateSportDto);
     return {
@@ -58,6 +69,9 @@ export class SportsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a specific sport by ID' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Sport deleted successfully' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Sport not found' })
   async remove(@Param('id') id: string): Promise<{ statusCode: number; message: string }> {
     await this.sportsService.remove(+id);
     return {
