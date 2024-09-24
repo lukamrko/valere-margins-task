@@ -9,8 +9,13 @@ async function bootstrap() {
     .setTitle('Attendance API')
     .setDescription('API documentation for Attendance management')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+    }, 'bearer')
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
