@@ -1,6 +1,7 @@
-import { Controller, Post, Body, HttpCode, HttpStatus} from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { AuthDto } from './dto/auth.dto'; // Adjust the path as necessary
 
 @ApiTags('Login and registration')
 @Controller('api/auth')
@@ -9,8 +10,11 @@ export class AuthController {
 
     @Post('login')
     @HttpCode(HttpStatus.OK)
-    async login(@Body() loginDto: { email: string; password: string }) {
-        const user = await this.authService.validateUser(loginDto.email, loginDto.password);
+    @ApiOperation({ summary: 'User login. Used to get bearer token.' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'User successfully logged in.' })
+    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+    async login(@Body() authDto: AuthDto) {
+        const user = await this.authService.validateUser(authDto.email, authDto.password);
         if (!user) {
             return {
                 statusCode: HttpStatus.UNAUTHORIZED,
@@ -21,9 +25,12 @@ export class AuthController {
     }
 
     @Post('register')
-    @HttpCode(HttpStatus.OK)
-    async register(@Body() registerDto: { email: string; password: string }) {
-        const user = await this.authService.registerUser(registerDto.email, registerDto.password);
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'User registration. After this user can login and get bearer token.' })
+    @ApiResponse({ status: HttpStatus.CREATED, description: 'User successfully registered.' })
+    @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'User already exists.' })
+    async register(@Body() authDto: AuthDto) {
+        const user = await this.authService.registerUser(authDto.email, authDto.password);
         return {
             statusCode: HttpStatus.CREATED,
             message: 'User successfully registered',
