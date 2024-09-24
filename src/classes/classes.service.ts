@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateClassDto } from './dto/create-class.dto';
@@ -6,6 +6,8 @@ import { UpdateClassDto } from './dto/update-class.dto';
 import { ReturnClassDto } from './dto/return-class.dto';
 import { Class } from './entities/class.entity';
 import { SportsService } from 'src/sports/sports.service';
+import { FullReturnClassDTO } from './dto/full-return-class.dto';
+import { SchedulesService } from 'src/schedules/schedules.service';
 
 @Injectable()
 export class ClassesService {
@@ -13,7 +15,9 @@ export class ClassesService {
   constructor(
     @InjectRepository(Class)
     private readonly classRepository: Repository<Class>,
-    private readonly sportsService: SportsService
+    private readonly sportsService: SportsService,
+    @Inject(forwardRef(() => SchedulesService))
+    private readonly schedulesService: SchedulesService
   ) { }
 
   private async toReturnClassDto(cls: Class): Promise<ReturnClassDto> {
@@ -60,6 +64,26 @@ export class ClassesService {
     return Promise.all(classes.map(cls => this.toReturnClassDto(cls)));
   }
 
+  async findOneWithSchedules(id: number): Promise<FullReturnClassDTO> {
+    // Fetch the class with its sport relation
+    const cls = await this.classRepository.findOne({
+      where: { classID: id },
+      relations: ['sport'],
+    });
+
+    if (!cls) {
+      throw new NotFoundException(`Class with ID ${id} not found`);
+    }
+
+    // Fetch schedules using the SchedulesService
+    const returnSchedules = await this.schedulesService.findSchedulesByClassId(id);
+
+    // Return the full class data along with schedules
+    return {
+      ...await this.toReturnClassDto(cls), // ReturnClassDto data
+      schedules: returnSchedules, // Schedules data
+    };
+  }
 
   async findOne(id: number): Promise<ReturnClassDto> {
     const cls = await this.classRepository.findOne({

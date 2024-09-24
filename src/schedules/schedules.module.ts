@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SchedulesService } from './schedules.service';
 import { SchedulesController } from './schedules.controller';
@@ -11,7 +11,7 @@ import { WeeksModule } from 'src/weeks/weeks.module';
   imports: [
     TypeOrmModule.forFeature([Schedule]),
     UsersModule,
-    ClassesModule,
+    forwardRef(() => ClassesModule),
     WeeksModule],
   controllers: [SchedulesController],
   providers: [SchedulesService],

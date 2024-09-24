@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
@@ -16,6 +16,7 @@ export class SchedulesService {
   constructor(
     @InjectRepository(Schedule)
     private readonly scheduleRepository: Repository<Schedule>,
+    @Inject(forwardRef(() => ClassesService))
     private readonly classesService: ClassesService,
     private readonly weeksService: WeeksService
   ) { }
@@ -69,6 +70,15 @@ export class SchedulesService {
       throw new NotFoundException(`Schedule with ID ${id} not found`);
     }
     return this.toReturnScheduleDto(schedule);
+  }
+
+  async findSchedulesByClassId(classId: number): Promise<ReturnScheduleDto[]> {
+    const schedules = await this.scheduleRepository.find({
+      where: { class: { classID: classId } },
+      relations: ['class', 'week'],
+    });
+
+    return Promise.all(schedules.map(schedule => this.toReturnScheduleDto(schedule)));
   }
 
   async update(id: number, updateScheduleDto: UpdateScheduleDto): Promise<ReturnScheduleDto> {

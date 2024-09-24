@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../config/jwt-auth.guard';
 import { RolesGuard } from '../config/roles.guard';
 import { Roles } from '../config/roles.decorator';
 import { Role } from '../config/role.enums';
+import { FullReturnClassDTO } from './dto/full-return-class.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.Admin)
@@ -48,6 +49,7 @@ export class ClassesController {
     };
   }
 
+  @Roles(Role.Admin, Role.User)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<{ statusCode: number; message: string; data: ReturnClassDto }> {
     const foundClass = await this.classesService.findOne(+id);
@@ -55,6 +57,18 @@ export class ClassesController {
       statusCode: HttpStatus.OK,
       message: `Class with ID ${id} retrieved successfully`,
       data: foundClass,
+    };
+  }
+
+  @Roles(Role.Admin, Role.User)
+  @Get(':id/full')
+  async findOneWithSchedules(@Param('id') id: string): Promise<{ statusCode: number; message: string; data: FullReturnClassDTO }> {
+    const classWithSchedules = await this.classesService.findOneWithSchedules(+id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: `Class with ID ${id} and its schedules retrieved successfully`,
+      data: classWithSchedules,
     };
   }
 
