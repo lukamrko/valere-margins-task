@@ -8,7 +8,7 @@ import { RolesGuard } from '../roles/roles.guard';
 import { Roles } from '../roles/roles.decorator';
 import { Role } from '../roles/role.enums';
 import { FullReturnClassDTO } from './dto/full-return-class.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('Classes')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -18,6 +18,8 @@ export class ClassesController {
   constructor(private readonly classesService: ClassesService) { }
 
   @Post()
+  @ApiOperation({ summary: 'Create a new class' })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Class successfully created', type: ReturnClassDto })
   async create(@Body() createClassDto: CreateClassDto): Promise<{ statusCode: number; message: string; data: ReturnClassDto }> {
     const newClass = await this.classesService.create(createClassDto);
     return {
@@ -28,6 +30,8 @@ export class ClassesController {
   }
 
   @Get('all')
+  @ApiOperation({ summary: 'Retrieve all classes' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Classes retrieved successfully', type: [ReturnClassDto] })
   async findAll(): Promise<{ statusCode: number; message: string; data: ReturnClassDto[] }> {
     const classes = await this.classesService.findAll();
     return {
@@ -39,8 +43,9 @@ export class ClassesController {
 
   @Roles(Role.Admin, Role.User)
   @Get()
-  async findAllByNames(@Query('sports') sports: string)
-    : Promise<{ statusCode: number; message: string; data: ReturnClassDto[] }> {
+  @ApiOperation({ summary: 'Retrieve classes by sports names' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Classes with specified sports retrieved successfully', type: [ReturnClassDto] })
+  async findAllByNames(@Query('sports') sports: string): Promise<{ statusCode: number; message: string; data: ReturnClassDto[] }> {
     const sportNames = sports.split(',');
     const classes = await this.classesService.findAllByNames(sportNames);
 
@@ -53,6 +58,8 @@ export class ClassesController {
 
   @Roles(Role.Admin)
   @Get(':id/old')
+  @ApiOperation({ summary: 'Retrieve a class without schedules by ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Class retrieved successfully', type: ReturnClassDto })
   async findOneWithoutSchedules(@Param('id') id: string): Promise<{ statusCode: number; message: string; data: ReturnClassDto }> {
     const classWithoutSchedules = await this.classesService.findOne(+id);
 
@@ -65,6 +72,8 @@ export class ClassesController {
 
   @Roles(Role.Admin, Role.User)
   @Get(':id')
+  @ApiOperation({ summary: 'Retrieve a class with schedules by ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Class with schedules retrieved successfully', type: FullReturnClassDTO })
   async findOneWithSchedules(@Param('id') id: string): Promise<{ statusCode: number; message: string; data: FullReturnClassDTO }> {
     const classWithSchedules = await this.classesService.findOneWithSchedules(+id);
 
@@ -76,6 +85,8 @@ export class ClassesController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update a class by ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Class updated successfully', type: ReturnClassDto })
   async update(@Param('id') id: string, @Body() updateClassDto: UpdateClassDto): Promise<{ statusCode: number; message: string; data: ReturnClassDto }> {
     const updatedClass = await this.classesService.update(+id, updateClassDto);
     return {
@@ -87,6 +98,8 @@ export class ClassesController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a class by ID' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Class deleted successfully' })
   async remove(@Param('id') id: string): Promise<{ statusCode: number; message: string }> {
     await this.classesService.remove(+id);
     return {
