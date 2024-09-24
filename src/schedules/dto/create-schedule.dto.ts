@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateScheduleDto {
-    @ApiProperty({ description: 'The day of the schedule' })
+    @ApiProperty({ description: 'The day of the schedule', example: 'Monday' })
     @IsNotEmpty()
     day: string;
 

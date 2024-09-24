@@ -8,7 +8,7 @@ export class ReturnScheduleDto {
     @IsNotEmpty()
     scheduleID: number;
 
-    @ApiProperty({ description: 'The day of the schedule' })
+    @ApiProperty({ description: 'The day of the schedule', example: 'Monday' })    
     @IsNotEmpty()
     day: string;
 
