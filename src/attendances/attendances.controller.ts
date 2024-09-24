@@ -2,10 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus
 import { AttendancesService } from './attendances.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { ReturnAttendanceDto } from './dto/return-attendance.dto';
-import { JwtAuthGuard } from '../config/jwt-auth.guard';
-import { RolesGuard } from '../config/roles.guard';
-import { Roles } from '../config/roles.decorator';
-import { Role } from '../config/role.enums';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../roles/roles.guard';
+import { Roles } from '../roles/roles.decorator';
+import { Role } from '../roles/role.enums';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 

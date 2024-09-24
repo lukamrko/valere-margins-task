@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service'; // Import UsersService
 import { User } from '../users/entities/user.entity'; // Import User entity
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { Role } from './role.enums';
+import { Role } from '../roles/role.enums';
 import { ReturnUserDto } from 'src/users/dto/return-user.dto';
 
 @Injectable()

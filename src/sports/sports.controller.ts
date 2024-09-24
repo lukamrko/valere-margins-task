@@ -3,10 +3,10 @@ import { SportsService } from './sports.service';
 import { CreateSportDto } from './dto/create-sport.dto';
 import { UpdateSportDto } from './dto/update-sport.dto';
 import { ReturnSportDto } from './dto/return-sport.dto';
-import { RolesGuard } from '../config/roles.guard';
-import { Roles } from '../config/roles.decorator';
-import { JwtAuthGuard } from '../config/jwt-auth.guard';
-import { Role } from '../config/role.enums';
+import { RolesGuard } from '../roles/roles.guard';
+import { Roles } from '../roles/roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Role } from '../roles/role.enums';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Sports')

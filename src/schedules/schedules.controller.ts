@@ -3,10 +3,10 @@ import { SchedulesService } from './schedules.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ReturnScheduleDto } from './dto/return-schedule.dto';
-import { JwtAuthGuard } from '../config/jwt-auth.guard';
-import { RolesGuard } from '../config/roles.guard';
-import { Roles } from '../config/roles.decorator';
-import { Role } from '../config/role.enums';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../roles/roles.guard';
+import { Roles } from '../roles/roles.decorator';
+import { Role } from '../roles/role.enums';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Schedules')

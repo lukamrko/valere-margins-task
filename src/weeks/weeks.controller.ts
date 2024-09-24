@@ -3,10 +3,10 @@ import { WeeksService } from './weeks.service';
 import { CreateWeekDto } from './dto/create-week.dto';
 import { UpdateWeekDto } from './dto/update-week.dto';
 import { ReturnWeekDto } from './dto/return-week.dto';
-import { RolesGuard } from '../config/roles.guard';
-import { Roles } from '../config/roles.decorator';
-import { JwtAuthGuard } from '../config/jwt-auth.guard';
-import { Role } from '../config/role.enums';
+import { RolesGuard } from '../roles/roles.guard';
+import { Roles } from '../roles/roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Role } from '../roles/role.enums';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Weeks')

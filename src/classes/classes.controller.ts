@@ -3,10 +3,10 @@ import { ClassesService } from './classes.service';
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { ReturnClassDto } from './dto/return-class.dto';
-import { JwtAuthGuard } from '../config/jwt-auth.guard';
-import { RolesGuard } from '../config/roles.guard';
-import { Roles } from '../config/roles.decorator';
-import { Role } from '../config/role.enums';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../roles/roles.guard';
+import { Roles } from '../roles/roles.decorator';
+import { Role } from '../roles/role.enums';
 import { FullReturnClassDTO } from './dto/full-return-class.dto';
 import { ApiTags } from '@nestjs/swagger';
 
