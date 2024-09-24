@@ -8,6 +8,7 @@ import { Roles } from '../roles/roles.decorator';
 import { Role } from '../roles/role.enums';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UserAttendanceDto } from './dto/user-attendance.dto';
 
 @ApiTags('Attendances')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -18,9 +19,9 @@ export class AttendancesController {
 
   @Roles(Role.Admin, Role.User)
   @Post()
-  @ApiOperation({ summary: 'Create attendance via user key' })
-  @ApiBody({ type: CreateAttendanceDto }) // Document the body type
-  @ApiResponse({ status: 201, description: 'Attendance successfully created.' })
+  @ApiOperation({ summary: 'USED BY NORMAL USERS. Create attendance via user key' })
+  @ApiBody({ type: UserAttendanceDto }) // Document the body type
+  @ApiResponse({ status: 201, description: 'Attendance successfully created.', type: ReturnAttendanceDto })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async createViaUserKey(
     @Body() createAttendanceDto: { classID: number },
@@ -31,7 +32,7 @@ export class AttendancesController {
     const newAttendanceDto = new CreateAttendanceDto();
     newAttendanceDto.classID = createAttendanceDto.classID;
     newAttendanceDto.userID = userID;
-    newAttendanceDto.registrationDateTime = new Date(); 
+    newAttendanceDto.registrationDateTime = new Date();
 
     const newAttendance = await this.attendancesService.create(newAttendanceDto);
 
@@ -43,6 +44,9 @@ export class AttendancesController {
   }
 
   @Post('full')
+  @ApiOperation({ summary: 'Create full attendance record' })
+  @ApiBody({ type: CreateAttendanceDto }) // Document the body type
+  @ApiResponse({ status: 201, description: 'Attendance successfully created.', type: ReturnAttendanceDto })
   async create(@Body() createAttendanceDto: CreateAttendanceDto): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto }> {
     const newAttendance = await this.attendancesService.createFull(createAttendanceDto);
     return {
@@ -53,6 +57,8 @@ export class AttendancesController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Retrieve all attendances' })
+  @ApiResponse({ status: 200, description: 'Attendances retrieved successfully', type: [ReturnAttendanceDto] })
   async findAll(): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto[] }> {
     const attendances = await this.attendancesService.findAll();
     return {
@@ -63,6 +69,8 @@ export class AttendancesController {
   }
 
   @Get('user/:userID')
+  @ApiOperation({ summary: 'Retrieve all attendances for a specific user' })
+  @ApiResponse({ status: 200, description: 'Attendances for user retrieved successfully', type: [ReturnAttendanceDto] })
   async findAllForUser(@Param('userID') userID: string): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto[] }> {
     const foundAttendances = await this.attendancesService.findAllForUser(+userID);
     return {
@@ -73,6 +81,8 @@ export class AttendancesController {
   }
 
   @Get('class/:classID')
+  @ApiOperation({ summary: 'Retrieve all attendances for a specific class' })
+  @ApiResponse({ status: 200, description: 'Attendances for class retrieved successfully', type: [ReturnAttendanceDto] })
   async findAllForClass(@Param('classID') classID: string): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto[] }> {
     const foundAttendances = await this.attendancesService.findAllForClass(+classID);
     return {
@@ -83,17 +93,21 @@ export class AttendancesController {
   }
 
   @Patch(':userID/:classID')
+  @ApiOperation({ summary: 'Update attendance record for a specific user and class' })
+  @ApiResponse({ status: 200, description: 'Attendance successfully updated.', type: ReturnAttendanceDto })
   async update(@Param('userID') userID: string, @Param('classID') classID: string, @Body() updateAttendanceDto: UpdateAttendanceDto): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto }> {
     const updatedSchedule = await this.attendancesService.update(+userID, +classID, updateAttendanceDto);
     return {
       statusCode: HttpStatus.OK,
-      message: `Schedule with  User ID ${userID} and Class ID ${classID} updated successfully`,
+      message: `Schedule with User ID ${userID} and Class ID ${classID} updated successfully`,
       data: updatedSchedule,
     };
   }
 
   @Delete(':userID/:classID')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete attendance record for a specific user and class' })
+  @ApiResponse({ status: 204, description: 'Attendance successfully deleted.' })
   async remove(@Param('userID') userID: string, @Param('classID') classID: string): Promise<{ statusCode: number; message: string }> {
     await this.attendancesService.remove(+userID, +classID);
     return {
