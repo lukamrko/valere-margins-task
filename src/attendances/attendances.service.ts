@@ -31,8 +31,23 @@ export class AttendancesService {
     };
   }
 
-  // Create a new attendance
   async create(createAttendanceDto: CreateAttendanceDto): Promise<ReturnAttendanceDto> {
+    const { classID, userID } = createAttendanceDto;
+
+    const newAttendance = this.attendanceRepository.create({
+      class: { classID },
+      user: { userID },
+    });
+
+    const savedAttendance = await this.attendanceRepository.save(newAttendance);
+
+    return {
+      ...savedAttendance
+    };
+  }
+
+  // Create a new attendance
+  async createFull(createAttendanceDto: CreateAttendanceDto): Promise<ReturnAttendanceDto> {
     const cls = await this.classesService.findOne(createAttendanceDto.classID);
     const user = await this.usersService.findOne(createAttendanceDto.userID);
 

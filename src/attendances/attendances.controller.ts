@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
 import { AttendancesService } from './attendances.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { ReturnAttendanceDto } from './dto/return-attendance.dto';
@@ -9,14 +9,36 @@ import { Role } from '../config/role.enums';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.Admin) // Adjust roles as necessary
+@Roles(Role.Admin)
 @Controller('attendances')
 export class AttendancesController {
   constructor(private readonly attendancesService: AttendancesService) { }
 
+  @Roles(Role.Admin, Role.User)
   @Post()
+  async createViaUserKey(
+    @Body() createAttendanceDto: { classID: number },
+    @Request() req,
+  ): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto }> {
+    const userID = req.user.userID;
+
+    const newAttendanceDto = new CreateAttendanceDto();
+    newAttendanceDto.classID = createAttendanceDto.classID;
+    newAttendanceDto.userID = userID;
+    newAttendanceDto.registrationDateTime = new Date(); 
+
+    const newAttendance = await this.attendancesService.create(newAttendanceDto);
+
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Attendance successfully created',
+      data: newAttendance,
+    };
+  }
+
+  @Post('full')
   async create(@Body() createAttendanceDto: CreateAttendanceDto): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto }> {
-    const newAttendance = await this.attendancesService.create(createAttendanceDto);
+    const newAttendance = await this.attendancesService.createFull(createAttendanceDto);
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Attendance successfully created',
@@ -34,7 +56,6 @@ export class AttendancesController {
     };
   }
 
-  // Fetch all attendances for a specific user
   @Get('user/:userID')
   async findAllForUser(@Param('userID') userID: string): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto[] }> {
     const foundAttendances = await this.attendancesService.findAllForUser(+userID);
@@ -45,7 +66,6 @@ export class AttendancesController {
     };
   }
 
-  // Fetch all attendances for a specific class
   @Get('class/:classID')
   async findAllForClass(@Param('classID') classID: string): Promise<{ statusCode: number; message: string; data: ReturnAttendanceDto[] }> {
     const foundAttendances = await this.attendancesService.findAllForClass(+classID);
