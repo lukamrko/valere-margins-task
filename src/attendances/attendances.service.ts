@@ -47,7 +47,6 @@ export class AttendancesService {
     };
   }
 
-  // Create a new attendance
   async createFull(createAttendanceDto: CreateAttendanceDto): Promise<ReturnAttendanceDto> {
     const cls = await this.classesService.findOne(createAttendanceDto.classID);
     const user = await this.usersService.findOne(createAttendanceDto.userID);
@@ -60,7 +59,7 @@ export class AttendancesService {
     }
 
     const newAttendance = this.attendanceRepository.create({
-      registrationDateTime: createAttendanceDto.registrationDateTime ?? new Date(), // Use current date if not provided
+      registrationDateTime: createAttendanceDto.registrationDateTime ?? new Date(),
       class: cls,
       user: user,
     });
