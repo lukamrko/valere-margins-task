@@ -10,7 +10,7 @@ import { Role } from '../config/role.enums';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.Admin)
-@Controller('weeks')
+@Controller('api/weeks')
 export class WeeksController {
   constructor(private readonly weeksService: WeeksService) { }
 

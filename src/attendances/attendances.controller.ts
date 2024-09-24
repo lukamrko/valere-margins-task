@@ -7,7 +7,9 @@ import { RolesGuard } from '../config/roles.guard';
 import { Roles } from '../config/roles.decorator';
 import { Role } from '../config/role.enums';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Attendances')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.Admin)
 @Controller('attendances')
@@ -16,6 +18,10 @@ export class AttendancesController {
 
   @Roles(Role.Admin, Role.User)
   @Post()
+  @ApiOperation({ summary: 'Create attendance via user key' })
+  @ApiBody({ type: CreateAttendanceDto }) // Document the body type
+  @ApiResponse({ status: 201, description: 'Attendance successfully created.' })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
   async createViaUserKey(
     @Body() createAttendanceDto: { classID: number },
     @Request() req,
