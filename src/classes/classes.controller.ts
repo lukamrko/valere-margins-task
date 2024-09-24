@@ -49,19 +49,20 @@ export class ClassesController {
     };
   }
 
-  @Roles(Role.Admin, Role.User)
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<{ statusCode: number; message: string; data: ReturnClassDto }> {
-    const foundClass = await this.classesService.findOne(+id);
+  @Roles(Role.Admin)
+  @Get(':id/old')
+  async findOneWithoutSchedules(@Param('id') id: string): Promise<{ statusCode: number; message: string; data: ReturnClassDto }> {
+    const classWithoutSchedules = await this.classesService.findOne(+id);
+
     return {
       statusCode: HttpStatus.OK,
       message: `Class with ID ${id} retrieved successfully`,
-      data: foundClass,
+      data: classWithoutSchedules,
     };
   }
 
   @Roles(Role.Admin, Role.User)
-  @Get(':id/full')
+  @Get(':id')
   async findOneWithSchedules(@Param('id') id: string): Promise<{ statusCode: number; message: string; data: FullReturnClassDTO }> {
     const classWithSchedules = await this.classesService.findOneWithSchedules(+id);
 
